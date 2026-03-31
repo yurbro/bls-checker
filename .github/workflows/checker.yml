@@ -8,7 +8,7 @@ on:
 jobs:
   check-slot:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
 
     steps:
       - name: Checkout code
@@ -23,8 +23,23 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Install Playwright browsers
+        run: playwright install --with-deps chromium
+
       - name: Run slot checker
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          BLS_EMAIL: ${{ secrets.BLS_EMAIL }}
+          BLS_PASSWORD: ${{ secrets.BLS_PASSWORD }}
+          SCREENSHOT_DIR: screenshots
         run: python checker.py
+
+      - name: Upload screenshots (debug)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bls-screenshots-${{ github.run_number }}
+          path: screenshots/
+          retention-days: 3
+          if-no-files-found: ignore

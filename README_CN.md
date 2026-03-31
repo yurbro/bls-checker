@@ -1,18 +1,19 @@
 <div align="center">
 
-# 🇪🇸 BLS Spain UK — 签证预约抢位机器人
+# 🇪🇸 BLS 西班牙签证（英国）— 预约空位检测器
 
-**再也不用手动刷新预约页面了。**
+**再也不会错过签证预约了。**
 
-每 5 分钟自动监测 BLS 西班牙签证（伦敦）预约页面，一旦有空位立刻发送 Telegram 通知。
+使用真实浏览器（Playwright）登录 BLS 系统，检测 London Tourist Visit 预约日历，一有空位立即 Telegram 通知你。
 
 🌐 [English](./README.md) | [中文](./README_CN.md)
 
 ---
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
+![Playwright](https://img.shields.io/badge/Playwright-无头浏览器-2EAD33?style=flat-square&logo=playwright&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-免费-2088FF?style=flat-square&logo=github-actions&logoColor=white)
-![Telegram](https://img.shields.io/badge/Telegram-Bot-26A5E4?style=flat-square&logo=telegram&logoColor=white)
+![Telegram](https://img.shields.io/badge/Telegram-机器人通知-26A5E4?style=flat-square&logo=telegram&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
 </div>
@@ -21,47 +22,57 @@
 
 ## ✨ 功能特点
 
-- 🔍 **自动检测** BLS Spain UK 预约页面的可用时间段
-- 📲 **即时 Telegram 推送** — 有空位立刻通知你，抢在别人前面
-- ⏱️ **每 5 分钟运行一次** — 基于 GitHub Actions，完全免费
-- 🛡️ **优雅的错误处理** — 超时、被拦截、网络波动都不会导致崩溃
-- 🔒 **零信息泄露** — 所有密钥通过 GitHub Secrets 管理，不写死在代码里
+- 🌐 **真实浏览器自动化** — 使用 Playwright（无头 Chromium）处理登录、JS渲染和动态内容
+- 🔐 **自动登录 BLS 账号** — 模拟完整的预约流程来检测可用日期
+- 📲 **发现空位立即 Telegram 通知** 并附带截图
+- ⏱️ **每 5 分钟检测一次** — 通过 GitHub Actions 运行，完全免费
+- 📸 **调试截图** — 每次运行保存截图，可在 GitHub Actions artifacts 中下载
+- 🛡️ **优雅的错误处理** — 网站宕机、登录失败、超时都能妥善处理
+- 🔒 **安全** — 所有凭据存储在 GitHub Secrets 中，绝不写入代码
 
 ---
 
-## 🚀 部署步骤
+## 🚀 快速开始
 
-### 第一步 — 创建 Telegram Bot
+### 第一步 — 创建 Telegram 机器人
 
 1. 打开 Telegram，搜索 **[@BotFather](https://t.me/BotFather)**
-2. 发送 `/newbot`，按提示为 bot 取名
-3. 复制返回的 **Bot Token**，格式类似 `123456789:AABBccDDee...`
-4. 找到你的新 bot，发送任意消息（如 `/start`）
-5. 在浏览器中打开以下链接获取 **Chat ID**（替换 `<YOUR_TOKEN>`）：
+2. 发送 `/newbot` 并按提示操作
+3. 复制你的 **Bot Token**（格式如 `123456789:AABBccDDee...`）
+4. 向你的新机器人发送 `/start` 开始对话
+5. 在浏览器中打开以下 URL 获取你的 **Chat ID**：
    ```
-   https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates
+   https://api.telegram.org/bot<你的Token>/getUpdates
    ```
-   在返回的 JSON 里找到 `"id"` 字段，即为你的 Chat ID
+   在返回的 JSON 中找到 `"id"` 字段
 
-### 第二步 — 上传代码到 GitHub
+### 第二步 — 注册 BLS 账号（如果还没有）
 
-1. Fork 本仓库，**或者**新建一个私有仓库
-2. 上传全部文件，包括 `.github/` 文件夹
+1. 前往 **[uk.blsspainglobal.com](https://uk.blsspainglobal.com/Global/account/RegisterUser)**
+2. 用你的邮箱注册账号
+3. 记住登录凭据——第四步需要用到
 
-### 第三步 — 配置 GitHub Secrets
+### 第三步 — Fork 或上传到 GitHub
 
-进入仓库：**Settings → Secrets and variables → Actions → New repository secret**
+1. Fork 本仓库 **或** 创建一个新的私有仓库
+2. 上传所有文件，包括 `.github/` 文件夹
 
-| Secret 名称 | 填入内容 |
-|-------------|----------|
-| `TELEGRAM_BOT_TOKEN` | 你的 Bot Token |
-| `TELEGRAM_CHAT_ID` | 你的 Chat ID（纯数字） |
+### 第四步 — 添加 GitHub Secrets
 
-### 第四步 — 启用并测试
+进入 **Settings → Secrets and variables → Actions → New repository secret**
 
-1. 点击仓库顶部 **Actions** 标签
+| Secret 名称 | 值 |
+|-------------|-----|
+| `TELEGRAM_BOT_TOKEN` | 你的 Telegram 机器人 Token |
+| `TELEGRAM_CHAT_ID` | 你的 Telegram Chat ID（纯数字） |
+| `BLS_EMAIL` | 你的 BLS 登录邮箱 |
+| `BLS_PASSWORD` | 你的 BLS 登录密码 |
+
+### 第五步 — 启用并测试
+
+1. 点击仓库的 **Actions** 标签
 2. 选择 **BLS Spain Slot Checker** → 点击 **Run workflow**
-3. 约 30 秒后，Telegram 收到启动通知即代表成功 ✅
+3. 1-2 分钟内，检查 workflow 日志和下载的截图确认是否正常工作
 
 ---
 
@@ -69,39 +80,39 @@
 
 ```
 bls-checker/
-├── checker.py                 # 核心检测脚本
+├── checker.py                 # 核心检测脚本（Playwright）
 ├── requirements.txt           # Python 依赖
 ├── .github/
 │   └── workflows/
-│       └── checker.yml        # GitHub Actions 定时配置（每 5 分钟）
+│       └── checker.yml        # GitHub Actions 定时任务（每5分钟）
+├── screenshots/               # 自动生成的调试截图
 └── README.md
 ```
 
 ---
 
-## ⚙️ 自定义配置
+## ⚙️ 工作原理
 
-所有配置都在 `checker.py` 顶部：
-
-```python
-# 目标 URL — 如果 BLS 更换了预约页面地址，在这里修改
-TARGET_URL = "https://blsspainuk.com/appointment/"
-
-# 出现以下任意关键词 → 判定为有空位
-SLOT_KEYWORDS = ["available", "select", "choose", "book", "confirm"]
-
-# 出现以下任意关键词 → 判定为无空位
-NO_SLOT_KEYWORDS = ["no appointment", "no slot", "fully booked", "unavailable"]
+```
+1. 启动无头 Chromium 浏览器
+2. 导航到 BLS 登录页面
+3. 填写邮箱 + 密码 → 登录
+4. 导航到 London Tourist Visit 预约页面
+5. 检查日历中是否有可选日期
+6. 有空位 → 发送 Telegram 通知 + 截图
+7. 无空位 → 记录日志，等待下次检测
 ```
 
 ### 修改检测频率
 
-编辑 `.github/workflows/checker.yml` 里的 cron 表达式：
+编辑 `.github/workflows/checker.yml` 中的 cron 表达式：
 
 ```yaml
-- cron: "*/5 * * * *"    # 每 5 分钟（推荐，也是最小间隔）
+- cron: "*/5 * * * *"    # 每 5 分钟（推荐）
 - cron: "*/10 * * * *"   # 每 10 分钟
 ```
+
+> **注意：** 5 分钟是 GitHub Actions 的最小间隔。
 
 ---
 
@@ -109,12 +120,13 @@ NO_SLOT_KEYWORDS = ["no appointment", "no slot", "fully booked", "unavailable"]
 
 | 服务 | 费用 |
 |------|------|
-| GitHub Actions | 每月 2000 分钟免费 · 本 bot 月均消耗约 1440 分钟 |
-| Telegram Bot API | 完全免费，无任何限制 |
+| GitHub Actions | 每月 2,000 分钟免费 · 本项目约使用 2,000 分钟/月 |
+| Telegram Bot API | 免费，无限制 |
+| Playwright | 免费，开源 |
 
 ---
 
-## 🔧 本地运行（可选）
+## 🔧 本地运行
 
 ```bash
 # 克隆仓库
@@ -123,42 +135,50 @@ cd bls-checker
 
 # 安装依赖
 pip install -r requirements.txt
+playwright install --with-deps chromium
 
-# 配置环境变量
-export TELEGRAM_BOT_TOKEN="你的Token"
-export TELEGRAM_CHAT_ID="你的ChatID"
+# 设置凭据（Windows 用 set 代替 export）
+export TELEGRAM_BOT_TOKEN="你的token"
+export TELEGRAM_CHAT_ID="你的chatid"
+export BLS_EMAIL="你的邮箱"
+export BLS_PASSWORD="你的密码"
 
 # 运行一次
 python checker.py
 ```
 
-如需持续运行，取消 `checker.py` 末尾 `while True` 循环的注释即可。
+---
+
+## 🐛 调试
+
+每次运行会生成截图，保存为 GitHub Actions artifacts：
+
+| 截图文件 | 说明 |
+|---------|------|
+| `01_login_page.png` | 登录页面已加载 |
+| `02_login_filled.png` | 已填写邮箱和密码 |
+| `03_after_login.png` | 登录后的状态 |
+| `04_visa_type_page.png` | Tourist Visit 页面 |
+| `05_booking_page.png` | 预约日历页面 |
+| `06_final_state.png` | 检测 slot 时的最终状态 |
+| `error_*.png` | 错误状态截图（如有） |
+
+查看方法：进入 **Actions** → 点击某次运行 → 滚动到 **Artifacts** → 下载 `bls-screenshots-*`
 
 ---
 
-## ⚠️ 注意事项
+## ⚠️ 免责声明
 
-- 本工具仅供**个人合理使用**，请勿频繁请求导致对方服务器压力
-- 检测到空位后，**需要你手动完成预约**，bot 不会自动填表或提交
-- 如果 BLS 网站加入了登录验证或重度 JS 渲染，可能需要升级为 [Playwright](https://playwright.dev/) 方案
-
----
-
-## 🤝 欢迎贡献
-
-欢迎提 PR！以下是一些待实现的功能：
-
-- [ ] Playwright 支持（应对 JS 渲染页面）
-- [ ] 支持多个预约类型同时监测
-- [ ] 企业微信 / Server酱通知支持
-- [ ] Docker 一键部署
+- 本工具仅供 **个人使用**，请勿以过高频率运行
+- 检测到空位后，你需要 **手动完成预约** — 机器人不会自动提交任何表单
+- 使用自动化工具可能违反 BLS 服务条款，请自行承担风险
 
 ---
 
 <div align="center">
 
-为所有在伦敦苦苦抢西班牙签证预约的人而做 ☕
+为每一个在伦敦苦苦等待西班牙签证预约的人而做 ☕
 
-**如果这个项目帮到了你，欢迎点一个 ⭐**
+**如果这个项目帮到了你，请给个 ⭐**
 
 </div>

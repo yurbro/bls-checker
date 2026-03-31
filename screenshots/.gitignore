@@ -1,0 +1,4 @@
+# Screenshots are generated during runtime
+# They should not be committed to git
+*.png
+!.gitkeep
