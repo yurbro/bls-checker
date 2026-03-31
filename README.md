@@ -1,127 +1,166 @@
-# 🇪🇸 BLS Spain UK — Visa Slot Checker Bot
+<div align="center">
 
-自动每 5 分钟检测伦敦 BLS 西班牙签证预约空位，发现 slot 立刻 Telegram 通知。
+# 🇪🇸 BLS Spain UK — Visa Slot Checker
+
+**Never miss a visa appointment again.**
+
+Monitors the BLS Spain UK booking page every 5 minutes and fires an instant Telegram alert the moment a slot opens up.
+
+🌐 [English](./README.md) | [中文](./README_CN.md)
 
 ---
 
-## 📁 项目结构
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-Free-2088FF?style=flat-square&logo=github-actions&logoColor=white)
+![Telegram](https://img.shields.io/badge/Telegram-Bot-26A5E4?style=flat-square&logo=telegram&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+
+</div>
+
+---
+
+## ✨ Features
+
+- 🔍 **Auto-detects** available appointment slots on BLS Spain UK
+- 📲 **Instant Telegram alerts** the moment a slot appears
+- ⏱️ **Runs every 5 minutes** via GitHub Actions — completely free
+- 🛡️ **Graceful error handling** — timeouts, blocks, and failures won't crash the bot
+- 🔒 **No credentials stored** — all secrets managed via GitHub environment variables
+
+---
+
+## 🚀 Quick Start
+
+### Step 1 — Create a Telegram Bot
+
+1. Open Telegram and search for **[@BotFather](https://t.me/BotFather)**
+2. Send `/newbot` and follow the prompts
+3. Copy your **Bot Token** — it looks like `123456789:AABBccDDee...`
+4. Start a conversation with your new bot by sending `/start`
+5. Get your **Chat ID** by opening this URL in your browser:
+   ```
+   https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates
+   ```
+   Look for the `"id"` field in the response JSON
+
+### Step 2 — Fork or Upload to GitHub
+
+1. Fork this repo **or** create a new private repository
+2. Upload all files including the `.github/` folder
+
+### Step 3 — Add GitHub Secrets
+
+Go to **Settings → Secrets and variables → Actions → New repository secret**
+
+| Secret | Value |
+|--------|-------|
+| `TELEGRAM_BOT_TOKEN` | Your bot token |
+| `TELEGRAM_CHAT_ID` | Your chat ID (numbers only) |
+
+### Step 4 — Enable & Test
+
+1. Click the **Actions** tab in your repository
+2. Select **BLS Spain Slot Checker** → click **Run workflow**
+3. Within 30 seconds, your Telegram should receive a startup message ✅
+
+---
+
+## 📁 Project Structure
 
 ```
 bls-checker/
-├── checker.py                    # 主检测脚本
-├── requirements.txt              # Python 依赖
+├── checker.py                 # Core detection script
+├── requirements.txt           # Python dependencies
 ├── .github/
 │   └── workflows/
-│       └── checker.yml           # GitHub Actions 自动运行配置
+│       └── checker.yml        # GitHub Actions schedule (every 5 min)
 └── README.md
 ```
 
 ---
 
-## 🚀 部署步骤（约 10 分钟）
+## ⚙️ Configuration
 
-### 第一步：创建 Telegram Bot
+All config lives at the top of `checker.py`:
 
-1. 打开 Telegram，搜索 **@BotFather**
-2. 发送 `/newbot`，按提示命名你的 bot
-3. 保存返回的 **Bot Token**（格式：`123456789:AABBcc...`）
-4. 搜索并打开你刚创建的 bot，发送任意消息（如 `/start`）
-5. 打开以下链接获取你的 **Chat ID**（替换 `<TOKEN>`）：
-   ```
-   https://api.telegram.org/bot<TOKEN>/getUpdates
-   ```
-   在返回的 JSON 中找到 `"id"` 字段，即为你的 Chat ID
-
----
-
-### 第二步：上传代码到 GitHub
-
-1. 登录 [github.com](https://github.com)，新建一个 **私有仓库**（建议设为 Private）
-2. 将本项目所有文件上传到仓库（包括 `.github` 文件夹）
-
----
-
-### 第三步：配置 GitHub Secrets
-
-在仓库页面进入：**Settings → Secrets and variables → Actions → New repository secret**
-
-添加以下两个 Secret：
-
-| Secret 名称         | 值                         |
-|---------------------|----------------------------|
-| `TELEGRAM_BOT_TOKEN` | 你的 Bot Token             |
-| `TELEGRAM_CHAT_ID`   | 你的 Chat ID（数字）        |
-
----
-
-### 第四步：激活 Actions
-
-1. 点击仓库的 **Actions** 标签
-2. 如果提示「Workflows aren't running」，点击 **Enable workflows**
-3. 手动触发一次测试：点击 `BLS Spain Slot Checker` → **Run workflow**
-4. 检查运行日志，并确认 Telegram 收到启动通知
-
----
-
-## ⚙️ 自定义配置
-
-### 修改检测 URL
-
-打开 `checker.py`，修改第 20 行：
 ```python
+# Target URL — update if BLS changes their booking page
 TARGET_URL = "https://blsspainuk.com/appointment/"
-```
-如果 BLS 实际预约页面 URL 不同，请替换为正确地址。
 
-### 调整关键词
+# Slot found if any of these appear on the page
+SLOT_KEYWORDS = ["available", "select", "choose", "book", "confirm"]
 
-如果检测不准确，可以修改第 23-27 行的关键词：
-```python
-SLOT_KEYWORDS    = ["available", "select", "choose", "book"]
-NO_SLOT_KEYWORDS = ["no appointment", "no slot", "fully booked"]
+# No slot if any of these appear
+NO_SLOT_KEYWORDS = ["no appointment", "no slot", "fully booked", "unavailable"]
 ```
 
-### 修改检测频率
+### Change check frequency
 
-修改 `checker.yml` 中的 cron 表达式：
+Edit the cron expression in `.github/workflows/checker.yml`:
+
 ```yaml
-- cron: "*/5 * * * *"   # 每 5 分钟（最小值）
-- cron: "*/10 * * * *"  # 每 10 分钟
+- cron: "*/5 * * * *"    # Every 5 minutes (recommended)
+- cron: "*/10 * * * *"   # Every 10 minutes
 ```
 
----
-
-## 💰 费用说明
-
-- **GitHub Actions**：公开/私有仓库每月 **2000 分钟免费**
-  - 每次运行约 30-60 秒
-  - 每 5 分钟一次 = 每月约 1440 次 × 1 分钟 ≈ **1440 分钟/月**
-  - 基本刚好在免费额度内 ✅
-- **Telegram Bot**：完全免费
+> **Note:** 5 minutes is GitHub Actions' minimum interval.
 
 ---
 
-## 🔧 本地测试（可选）
+## 💰 Completely Free
+
+| Service | Cost |
+|---------|------|
+| GitHub Actions | 2,000 min/month free · this bot uses ~1,440 min/month |
+| Telegram Bot API | Free, no limits |
+
+---
+
+## 🔧 Run Locally
 
 ```bash
-# 安装依赖
+# Clone the repo
+git clone https://github.com/your-username/bls-checker.git
+cd bls-checker
+
+# Install dependencies
 pip install -r requirements.txt
 
-# 设置环境变量
-export TELEGRAM_BOT_TOKEN="你的Token"
-export TELEGRAM_CHAT_ID="你的ChatID"
+# Set your credentials
+export TELEGRAM_BOT_TOKEN="your-token"
+export TELEGRAM_CHAT_ID="your-chat-id"
 
-# 运行一次
-python checker.py
-
-# 持续运行（取消 checker.py 末尾注释）
+# Run once
 python checker.py
 ```
 
+To run continuously, uncomment the `while True` loop at the bottom of `checker.py`.
+
 ---
 
-## ⚠️ 注意事项
+## ⚠️ Disclaimer
 
-- 请勿滥用，过于频繁的请求可能触发 BLS 的反爬机制（5分钟间隔较安全）
-- 如果 BLS 页面使用了重定向或登录验证，可能需要升级为 Playwright 方案
-- 发现 slot 后请**立刻手动完成预约**，bot 不会自动帮你填表
+- This tool is for **personal use only**. Do not run at abusive frequencies.
+- When a slot is detected, you must **complete the booking manually** — the bot does not auto-submit any forms.
+- If BLS adds login requirements or heavy JavaScript, the script may need to be upgraded to [Playwright](https://playwright.dev/).
+
+---
+
+## 🤝 Contributing
+
+PRs welcome! Some ideas for future improvements:
+
+- [ ] Playwright support for JS-rendered pages
+- [ ] Support for multiple appointment types
+- [ ] Discord / WeChat notification options
+- [ ] Docker deployment support
+
+---
+
+<div align="center">
+
+Made with ☕ for everyone struggling to get a Spain visa appointment in London.
+
+**If this saved you time, consider giving it a ⭐**
+
+</div>
